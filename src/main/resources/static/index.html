@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Front Dlocal</title>
+    <link href="index.css" rel="stylesheet">
+</head>
+<body>
+<h1>Title demo dlocal</h1>
+<form>
+    <div class="form-rowd">
+        <label>Cardholder name</label>
+        <input id="card-holder" type="text" name="card-holder" placeholder="John Doe" value="Thiago Gabriel"/>
+        <br/>
+        <label for="card">Card 4111111111111111 cvv 123 month = "10" "2040"</label>
+        <div id="card"></div>
+      
+        <button id="btnSubmit">Pay</button>
+    </div>
+</form>
+<script src="https://js-sandbox.dlocal.com"></script>
+<script src="https://raw.githubusercontent.com/biggora/device-uuid/master/lib/device-uuid.min.js"></script>
+<!-- Scripts -->
+<script src="https://static-sandbox.dlocal.com/js/collector/direct.js"></script>
+
+<script text="text/javascript">
+
+</script>
+<script>
+   let ip;
+   //Recolector de informacion de dlocal
+   //dlocalCollector.create({ apiKey: 'db252d4e-4617-48b2-b946-5d5f39cfbcb9' }).then((event_uuid) => console.log(event_uuid));
+
+   fetch("https://www.cloudflare.com/cdn-cgi/trace").then( data => {
+        return data.text();
+    }).then( data => {
+        data = data.trim().split('\n').reduce(function(obj, pair) {
+        pair = pair.split('=');
+        return obj[pair[0]] = pair[1], obj;
+        }, {});
+        console.log(data.ip);
+        ip = data.ip;
+    });
+    
+    const dlocalInstance = dlocal('db252d4e-4617-48b2-b946-5d5f39cfbcb9');
+    const fields = dlocalInstance.fields({
+            locale: 'en',
+            country: 'BR',
+            fonts: [{
+                cssSrc: 'https://rsms.me/inter/inter-ui.css'
+            }]
+    });   
+
+    let style = {
+        base: {
+    // Add your base input styles here. For example:
+            fontSize: "16px",
+            fontFamily: "'Inter UI medium', sans-serif",
+            lineHeight: '18px',
+            fontSmoothing: 'antialiased',
+            fontWeight: '500',
+            color: "#32325d",
+            '::placeholder': {
+                color: "#aab7c4"
+            },
+            iconColor: "#adbfd3"
+        }
+    };
+
+// Create an instance of the card Field.
+    const card = fields.create('card', {style: style});
+// Add an instance of the card Field into the `card-field` <div>.
+    card.mount(document.getElementById('card'));
+// Generate a token using the card number, cvv and expiration date.
+ const btnSubmit = document.getElementById('btnSubmit');
+ const cardHolderName = document.getElementById('card-holder').value;
+let token;
+
+btnSubmit.addEventListener('click', function(e) {
+   e.preventDefault();
+  dlocalInstance.createToken(card, {
+     name: cardHolderName,
+}).then(function(response) {
+    token = response.token;
+    console.log(token);
+    console.log(ip)
+    fetch('/payments', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            token: token,
+            ip: ip,
+        })
+    }).then(function(response) {
+        return response.json();
+    }).then(function(data) {
+        console.log(data);
+    });
+}).catch(function(error) {
+    console.log(error);
+});
+});
+
+
+
+</script>
+</body>
+</html>

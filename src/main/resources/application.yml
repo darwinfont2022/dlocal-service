@@ -1,0 +1,18 @@
+server:
+  port: ${PORT:8080}
+#spring.cloud.compatibility-verifier.enabled=false
+#eureka.client.register-with-eureka=false
+#eureka.client.fetch-registry=false
+dlocal:
+  x_login: ${DLOCAL_X_LOGIN}
+  x_trans_key: ${DLOCAL_X_TRANS_KEY}
+  x_secret_key: ${DLOCAL_X_SECRET_KEY}
+  x_version: ${DLOCAL_X_VERSION}
+  api_url: ${DLOCAL_API_URL}
+  notification_base_url: ${NOTIFICATION_BASE_URL}
+#X_Login = E0KKwWki8i
+#X_Trans_Key = aplLJYJp8S
+#X_Version = 2.1
+#X_SecretKey = R67aXi41gnhWOq5G0di6txAqm6qyU2L9x
+#API_URL = https://766d-186-51-162-191.sa.ngrok.io/
+
