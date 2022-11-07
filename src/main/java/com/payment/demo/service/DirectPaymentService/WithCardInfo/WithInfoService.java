@@ -1,4 +1,4 @@
-package com.payment.demo.service.DirectPaymentService;
+package com.payment.demo.service.DirectPaymentService.WithCardInfo;
 
 import com.payment.demo.clients.model.response.ResponsePayment;
 import com.payment.demo.controller.PaymentDirect.dto.request.RequestPaymentCardInfoDto;

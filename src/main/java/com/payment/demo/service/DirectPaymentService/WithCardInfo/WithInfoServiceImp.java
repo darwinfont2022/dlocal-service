@@ -1,4 +1,4 @@
-package com.payment.demo.service.DirectPaymentService;
+package com.payment.demo.service.DirectPaymentService.WithCardInfo;
 
 import com.payment.demo.clients.FeignClientDlocal;
 import com.payment.demo.clients.model.request.Payer;
@@ -6,6 +6,7 @@ import com.payment.demo.clients.model.request.RequestPaymentCardInfo;
 import com.payment.demo.clients.model.request.card.RequestCardInfo;
 import com.payment.demo.clients.model.response.ResponsePayment;
 import com.payment.demo.controller.PaymentDirect.dto.request.RequestPaymentCardInfoDto;
+import com.payment.demo.service.DirectPaymentService.WithCardInfo.WithInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

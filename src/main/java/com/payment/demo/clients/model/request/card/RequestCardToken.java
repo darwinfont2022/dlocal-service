@@ -5,4 +5,7 @@ import lombok.Data;
 @Data
 public class RequestCardToken {
     private String token;
+    public RequestCardToken(String token) {
+        this.token = token;
+    }
 }

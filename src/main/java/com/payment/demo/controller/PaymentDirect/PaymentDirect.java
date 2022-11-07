@@ -3,10 +3,12 @@ package com.payment.demo.controller.PaymentDirect;
 import com.payment.demo.clients.model.response.PaymentMethod;
 import com.payment.demo.clients.model.response.ResponsePayment;
 import com.payment.demo.controller.PaymentDirect.dto.request.RequestPaymentCardInfoDto;
+import com.payment.demo.controller.PaymentDirect.dto.request.RequestPaymentCardTokenDto;
 import com.payment.demo.dtos.CurrencyExchangeDto;
+import com.payment.demo.service.DirectPaymentService.CardToken.CardTokenServiceImp;
 import com.payment.demo.service.DirectPaymentService.PaymentServiceImp;
 
-import com.payment.demo.service.DirectPaymentService.WithInfoServiceImp;
+import com.payment.demo.service.DirectPaymentService.WithCardInfo.WithInfoServiceImp;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +22,13 @@ import java.util.Map;
 public class PaymentDirect {
     private final PaymentServiceImp service;
     private final WithInfoServiceImp withInfoService;
-    public PaymentDirect(PaymentServiceImp service, WithInfoServiceImp withInfoService){
+
+    private  final CardTokenServiceImp cardTokenService;
+
+    public PaymentDirect(PaymentServiceImp service, WithInfoServiceImp withInfoService, CardTokenServiceImp cardTokenService){
         this.service = service;
         this.withInfoService = withInfoService;
+        this.cardTokenService = cardTokenService;
     }
 /*
 Esta url se usa para pagos directos tengo que revisar los datos que se requieren para procesar el pagao
@@ -52,8 +58,8 @@ de Dlocal
     }
 
     @PostMapping("/payments/cardToken")
-    public ResponseEntity<?> paymentsWithCardToken(){
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ResponsePayment> paymentsWithCardToken(@RequestBody RequestPaymentCardTokenDto dto){
+        return ResponseEntity.ok(this.cardTokenService.createPaymentWithCardToken(dto));
     }
 
     @PostMapping("/payments/cardSaved")

@@ -21,7 +21,7 @@ public interface FeignClientDlocal {
     @return: String con el cuerpo de la orden de pago formato json
      */
     @PostMapping(value = "/payments", produces = "application/json")
-    public ResponsePayment createPayment(@RequestBody RequestPaymentRedirect body);
+    public ResponsePayment createPayment(@RequestBody Object body);
 
     @PostMapping(value = "/secure_payments", produces = "application/json")
     public ResponsePayment createPaymentWithCardInfo(@RequestBody RequestPaymentCardInfo body);
