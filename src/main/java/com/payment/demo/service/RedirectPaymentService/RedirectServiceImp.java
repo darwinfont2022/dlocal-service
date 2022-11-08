@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class RedirectServiceImp {
+public class RedirectServiceImp implements RedirectService{
     private final FeignClientDlocal clientDlocal;
 
     @Value("${dlocal.notification_base_url}")
@@ -22,7 +22,7 @@ public class RedirectServiceImp {
     public RedirectServiceImp(FeignClientDlocal clientDlocal) {
         this.clientDlocal = clientDlocal;
     }
-
+    @Override
     public ResponsePayment createPayment(CreateRedirectPaymentDto paymentDto) {
         try {
             var payer = Payer
@@ -50,21 +50,66 @@ public class RedirectServiceImp {
         }
     }
 
-    public ResponsePayment getPaymentById(String id) {
+    @Override
+    public ResponsePayment createBankTranference(CreateRedirectPaymentDto paymentDto){
         try {
-            return clientDlocal.getPaymentById(id);
+            var payer = Payer
+                    .builder()
+                    .name(paymentDto.getName())
+                    .user_reference(paymentDto.getUser_reference())
+                    .email(paymentDto.getEmail())
+                    .document(paymentDto.getDocument())
+                    .build();
+            var paymentObj = RequestPaymentRedirect
+                    .builder()
+                    .amount(paymentDto.getAmount())
+                    .country(paymentDto.getCountry())
+                    .currency(paymentDto.getCurrency())
+                    .order_id(paymentDto.getOrder_id())
+                    .notification_url(notification_base_url)
+                    .callback_url(notification_base_url)
+                    .payment_method_id(paymentDto.getMethod_id())
+                    .payment_method_flow("REDIRECT")
+                    .payer(payer)
+                    .build();
+
+            return clientDlocal.createPayment(paymentObj);
         } catch (Exception e) {
-            log.error("Exception getting payment " + id + "\n\n" + e.getMessage());
-            throw new NotFoundExeption("payment" + id);
+            log.error("Error creating bank transference\n\n" + e.getMessage());
+            throw new ExceptionFeignClient(" Dlocal enterprise error creating bank transference");
         }
     }
 
-    public ResponsePayment getPaymentDetails(String paymentId) {
+    @Override
+    public ResponsePayment createPaymentWithTicket(CreateRedirectPaymentDto paymentDto) {
         try {
-            return clientDlocal.getPaymentById(paymentId);
+            var paymentObj = RequestPaymentRedirect
+                    .builder()
+                    .payment_method_flow("REDIRECT")
+                    .payment_method_id("AI")
+                    .payer(Payer
+                            .builder()
+                            .name(paymentDto.getName())
+                            .user_reference("")
+                            .email(paymentDto.getEmail())
+                            .document(paymentDto.getDocument())
+                            .build()
+                    )
+                    .callback_url("http://payment/notification")
+                    .notification_url("http://payment/notification")
+                    .order_id(paymentDto.getOrder_id())
+                    .amount(paymentDto.getAmount())
+                    .currency(paymentDto.getCurrency())
+                    .country(paymentDto.getCountry())
+                    .build();
+            return this.clientDlocal.createPayment(paymentObj);
         } catch (Exception e) {
-            log.error("Exception getting payment " + paymentId + "\n\n" + e.getMessage());
-            throw new NotFoundExeption("payment " + paymentId);
+            log.error("Error creating payment with ticket\n" + e.getMessage());
+
+            var i = e.getMessage().lastIndexOf("message");
+            var m = e.getMessage().subSequence(i,e.getMessage().length() - 3).toString().replace("message\":\"", " ");
+
+            throw new ExceptionFeignClient(m);
         }
     }
 }

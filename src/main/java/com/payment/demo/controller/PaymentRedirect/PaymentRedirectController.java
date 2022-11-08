@@ -24,16 +24,16 @@ public class PaymentRedirectController {
 
     @PostMapping("")
     public ResponseEntity<RedirectPaymentCreatedDto> createPayment(@RequestBody CreateRedirectPaymentDto createRedirectPaymentDto){
-        return new ResponseEntity<>(mapper.map(service.createPayment(createRedirectPaymentDto), RedirectPaymentCreatedDto.class), HttpStatus.CREATED);
+        return new ResponseEntity<>(mapper.map(this.service.createPayment(createRedirectPaymentDto), RedirectPaymentCreatedDto.class), HttpStatus.CREATED);
     }
 
-    @GetMapping("/{paymentId}")
-    public ResponseEntity<RedirectPaymentCreatedShipDto> getPayment(@PathVariable(name = "paymentId") String paymentId){
-        return ResponseEntity.ok(mapper.map(service.getPaymentById(paymentId), RedirectPaymentCreatedShipDto.class));
+    @PostMapping("/payment-ticket")
+    public ResponseEntity<ResponsePayment> createPaymetTycket(@RequestBody CreateRedirectPaymentDto dto) {
+        return ResponseEntity.ok(this.service.createPaymentWithTicket(dto));
     }
 
-    @GetMapping("/{paymentId}/details")
-    public ResponseEntity<ResponsePayment> getPaymentDetailsById(@PathVariable String paymentId) {
-        return ResponseEntity.ok(service.getPaymentDetails(paymentId));
+    @PostMapping("/bankTransfer")
+    public ResponseEntity<ResponsePayment> bankTransfer(@RequestBody CreateRedirectPaymentDto paymentDto) {
+        return ResponseEntity.ok(service.createBankTranference(paymentDto));
     }
 }

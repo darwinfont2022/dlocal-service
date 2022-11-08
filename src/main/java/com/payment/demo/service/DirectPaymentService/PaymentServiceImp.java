@@ -1,14 +1,21 @@
 package com.payment.demo.service.DirectPaymentService;
 
-import com.google.gson.Gson;
 import com.payment.demo.clients.FeignClientDlocal;
-import com.payment.demo.dtos.PaymentRequest;
-import com.payment.demo.dtos.CurrencyExchangeDto;
+import com.payment.demo.clients.model.request.Payer;
+import com.payment.demo.clients.model.request.RequestPaymentCardInfo;
+import com.payment.demo.clients.model.request.RequestPaymentCardToken;
+import com.payment.demo.clients.model.request.card.RequestCardInfo;
+import com.payment.demo.clients.model.request.card.RequestCardToken;
+import com.payment.demo.clients.model.response.ResponsePayment;
+import com.payment.demo.controller.PaymentDirect.dto.request.RequestPaymentDto;
+import com.payment.demo.clients.model.response.CurrencyExchange;
 import com.payment.demo.clients.model.response.PaymentMethod;
-import com.payment.demo.dtos.DataDto;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.payment.demo.exeptions.ExceptionFeignClient;
+import com.payment.demo.exeptions.NotFoundExeption;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -17,46 +24,8 @@ import org.springframework.stereotype.Service;
 public class PaymentServiceImp implements PaymentService {
     private final FeignClientDlocal dlocalClient;
 
-    public PaymentServiceImp(FeignClientDlocal dlocalClient) { this.dlocalClient = dlocalClient; }
-    
-    // Create payment
-    public String createPayment(DataDto dataDto){
-        //ModelMapper modelMapper = new ModelMapper();
-        //System.out.println("Init Body Request");
-        Gson gson = new Gson();
-        //DataDto dataDto = gson.fromJson((String) data, DataDto.class);
-        System.out.println("Token: " + dataDto.token + "\nIp: " + dataDto.ip);
-        System.out.println();
-
-        var body= PaymentRequest.createBodyRequest(dataDto);//Creando body request
-        try {
-            System.out.println(new Gson().toJson(body));
-//            var result = dlocalClient.createPayment(new Gson().toJson(body));
-//            System.out.println(result);
-            return "";//result;
-        } catch (Exception e) {
-            System.out.println("Error creating payment: " + e.getMessage());
-            return  (e.getMessage());
-        }
-    }
-
-    public List<PaymentMethod> getMethods(String country, String type) {
-        try {
-            var methods = dlocalClient.getPaymentsMethods(country);
-            //Filtrado de metodos por tipo CARD
-            if(!type.isBlank()) {
-                methods = methods.stream().filter(method -> method.getType().equals(type)).collect(Collectors.toList());
-            }
-            return methods;
-        } catch (Exception e) {
-            log.error("Error getting payments methods");
-            return null;
-        }
-    }
-
-    //Currency Exchanges
-    public CurrencyExchangeDto getCurrencyExchanges(String from, String to) {
-        return dlocalClient.currencyExchanges(from, to);
+    public PaymentServiceImp(FeignClientDlocal dlocalClient) {
+        this.dlocalClient = dlocalClient;
     }
 
     public Object geTOrderById(String order_id){
@@ -64,17 +33,79 @@ public class PaymentServiceImp implements PaymentService {
             return dlocalClient.getOrderById(order_id);
         } catch (Exception e) {
             System.out.println("Error getting payment order: " + e.getMessage());
-            return e.getMessage();
+            throw new NotFoundExeption(" Error getting payment order: " + order_id);
         }
     }
     @Override
-    public void payWithCardTocken() {
-
+    public ResponsePayment payWithCardToken(RequestPaymentDto requestDto) {
+        RequestPaymentCardToken payment = RequestPaymentCardToken.builder()
+                .order_id(requestDto.getOrder_id())
+                .amount(requestDto.getAmount())
+                .currency(requestDto.getCurrency())
+                .country(requestDto.getCountry())
+                .payment_method_id(requestDto.getMethod_id())
+                .payment_method_flow("DIRECT")
+                .notification_url("https://localhost/url")
+                .callback_url("https://localhost/callback_url")
+                .payer(Payer
+                        .builder()
+                        .user_reference(requestDto.getHolder_name())
+                        .email("")
+                        .user_reference("")
+                        .build()
+                )
+                .card(RequestCardToken
+                        .builder()
+                        .token(requestDto.getToken())
+                        .build()
+                )
+                .build();
+        try {
+            return this.dlocalClient.createPayment(payment);
+        } catch (Exception e) {
+            log.error("Error calling dlocalClient " + e.getMessage());
+            throw new ExceptionFeignClient(" Error payment with card token");
+        }
     }
 
     @Override
-    public void payWithCardSaved() {
+    public ResponsePayment payWithCardInfo(RequestPaymentDto requestDto) {
+        try {
+            RequestCardInfo card = RequestCardInfo
+                    .builder()
+                    .holder_name(requestDto.getHolder_name())
+                    .number(requestDto.getNumber())
+                    .cvv(requestDto.getCvv())
+                    .expiration_month(requestDto.getExpiration_month())
+                    .expiration_year(requestDto.getExpiration_year())
+                    .build();
 
+            Payer payer = Payer
+                    .builder()
+                    .name(requestDto.getHolder_name())
+                    .email("")
+                    .user_reference("")
+                    .build();
+
+            RequestPaymentCardInfo paymentCardInfo = RequestPaymentCardInfo
+                    .builder()
+                    .amount(requestDto.getAmount())
+                    .currency(requestDto.getCurrency())
+                    .country(requestDto.getCountry())
+                    .order_id(requestDto.getOrder_id())
+                    .payment_method_id(requestDto.getMethod_id())
+                    .payment_method_flow("DIRECT")
+                    .notification_url("")
+                    .callback_url("")
+                    .payer(payer)
+                    .card(card)
+                    .build();
+
+            return dlocalClient.createPaymentWithCardInfo(paymentCardInfo);
+        } catch (Exception e) {
+            log.error("Error payment with card info " + e.getMessage());
+            throw new ExceptionFeignClient(" Error payment with card info");
+        }
     }
 }
 

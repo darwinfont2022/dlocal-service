@@ -1,7 +1,9 @@
 package com.payment.demo.clients.config;
 
 import feign.RequestTemplate;
+import feign.codec.ErrorDecoder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -57,4 +59,9 @@ public class FeignConfig implements feign.RequestInterceptor {
             requestTemplate.header("Authorization","V2-HMAC-SHA256, Signature:"+ generateSignature(new String(requestTemplate.body())));
         }
     }
+
+//    @Bean
+//    public ErrorDecoder errorDecoder() {
+//        return new CustomErrorDecoder();
+//    }
 }

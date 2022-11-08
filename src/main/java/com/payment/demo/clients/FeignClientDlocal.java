@@ -1,11 +1,10 @@
 package com.payment.demo.clients;
 
 import com.payment.demo.clients.model.request.RequestPaymentCardInfo;
-import com.payment.demo.clients.model.request.RequestPaymentRedirect;
 import com.payment.demo.clients.model.response.ResponsePayment;
 import com.payment.demo.clients.config.FeignConfig;
 import com.payment.demo.clients.model.response.ResponsePaymentStatus;
-import com.payment.demo.dtos.CurrencyExchangeDto;
+import com.payment.demo.clients.model.response.CurrencyExchange;
 import com.payment.demo.clients.model.response.ResponseOrder;
 import com.payment.demo.clients.model.response.PaymentMethod;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -45,7 +44,7 @@ public interface FeignClientDlocal {
     public List<PaymentMethod> getPaymentsMethods(@PathVariable String country);
 
     @GetMapping(value = "/currency-exchanges?from={from}&to={to}", produces = "application/json")
-    public CurrencyExchangeDto currencyExchanges(@PathVariable String from, @PathVariable String to);
+    public CurrencyExchange currencyExchanges(@PathVariable String from, @PathVariable String to);
 
    @GetMapping("/orders/{orderId}")
    public ResponseOrder getOrderById(@PathVariable String orderId);

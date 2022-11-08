@@ -1,4 +1,4 @@
-package com.payment.demo.controller.Order.dto;
+package com.payment.demo.controller.CommonController.dto;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,8 +1,6 @@
-package com.payment.demo.dtos;
+package com.payment.demo.clients.model.response;
 
-import lombok.Data;
-
-public class CurrencyExchangeDto {
+public class CurrencyExchange {
     private String from;
     private String to;
     private String rete;
