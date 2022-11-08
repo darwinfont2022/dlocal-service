@@ -18,7 +18,6 @@ public class CardTokenServiceImp implements CardTokenService {
         this.dlocal = dlocal;
     }
 
-
     @Override
     public ResponsePayment createPaymentWithCardToken(RequestPaymentCardTokenDto requestDto) {
         log.info("Dto recived \n",requestDto.toString());
@@ -31,8 +30,18 @@ public class CardTokenServiceImp implements CardTokenService {
                 .payment_method_flow("DIRECT")
                 .notification_url("https://localhost/url")
                 .callback_url("https://localhost/callback_url")
-                .payer(new Payer("", "", ""))
-                .card(new RequestCardToken(requestDto.getToken()))
+                .payer(Payer
+                        .builder()
+                        .user_reference(requestDto.getHolder_name())
+                        .email("")
+                        .user_reference("")
+                        .build()
+                )
+                .card(RequestCardToken
+                        .builder()
+                        .token(requestDto.getToken())
+                        .build()
+                )
                 .build();
 
         log.info("Payment Object created \n",payment.toString());

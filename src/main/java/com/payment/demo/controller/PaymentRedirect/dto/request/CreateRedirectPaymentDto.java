@@ -6,6 +6,8 @@ import lombok.Data;
 public class CreateRedirectPaymentDto {
     private String name;
     private String email;
+    private String document;
+    private String method_id;
     private String user_reference;// user_id
     private String order_id;
     private float amount;

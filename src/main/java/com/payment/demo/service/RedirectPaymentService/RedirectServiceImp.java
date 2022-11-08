@@ -1,9 +1,12 @@
 package com.payment.demo.service.RedirectPaymentService;
 
 import com.payment.demo.clients.FeignClientDlocal;
+import com.payment.demo.clients.model.request.Payer;
 import com.payment.demo.clients.model.response.ResponsePayment;
 import com.payment.demo.controller.PaymentRedirect.dto.request.CreateRedirectPaymentDto;
 import com.payment.demo.clients.model.request.RequestPaymentRedirect;
+import com.payment.demo.exeptions.ExceptionFeignClient;
+import com.payment.demo.exeptions.NotFoundExeption;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,13 +23,30 @@ public class RedirectServiceImp {
         this.clientDlocal = clientDlocal;
     }
 
-    public ResponsePayment createPayment(CreateRedirectPaymentDto createRedirectPaymentDto) {
+    public ResponsePayment createPayment(CreateRedirectPaymentDto paymentDto) {
         try {
-            RequestPaymentRedirect paymentObj = RequestPaymentRedirect.buildRedirect(createRedirectPaymentDto, this.notification_base_url, "");//Creando payment Object
+            var payer = Payer
+                    .builder()
+                    .name(paymentDto.getName())
+                    .user_reference(paymentDto.getUser_reference())
+                    .email(paymentDto.getEmail())
+                    .build();
+            var paymentObj = RequestPaymentRedirect
+                    .builder()
+                    .amount(paymentDto.getAmount())
+                    .country(paymentDto.getCountry())
+                    .currency(paymentDto.getCurrency())
+                    .order_id(paymentDto.getOrder_id())
+                    .notification_url(notification_base_url)
+                    .callback_url(notification_base_url)
+                    .payment_method_flow("REDIRECT")
+                    .payer(payer)
+                    .build();
+
             return clientDlocal.createPayment(paymentObj);
         } catch (Exception e) {
             log.error("Error creating redirect payment\n\n" + e.getMessage());
-            return  null;
+            throw new ExceptionFeignClient("Dlocal enterprise");
         }
     }
 
@@ -35,7 +55,7 @@ public class RedirectServiceImp {
             return clientDlocal.getPaymentById(id);
         } catch (Exception e) {
             log.error("Exception getting payment " + id + "\n\n" + e.getMessage());
-            return null;
+            throw new NotFoundExeption("payment" + id);
         }
     }
 
@@ -44,7 +64,7 @@ public class RedirectServiceImp {
             return clientDlocal.getPaymentById(paymentId);
         } catch (Exception e) {
             log.error("Exception getting payment " + paymentId + "\n\n" + e.getMessage());
-            return null;
+            throw new NotFoundExeption("payment " + paymentId);
         }
     }
 }

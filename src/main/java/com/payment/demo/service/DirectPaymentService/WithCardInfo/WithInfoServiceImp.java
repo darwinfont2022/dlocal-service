@@ -23,28 +23,38 @@ public class WithInfoServiceImp implements WithInfoService {
 
     @Override
     public ResponsePayment payWithCardInfo(RequestPaymentCardInfoDto requestDto) {
-        RequestPaymentCardInfo paymentCardInfo;
         try {
-        RequestCardInfo card = RequestCardInfo.build(
-                requestDto.getHolder_name(),
-                requestDto.getExpiration_month(),
-                requestDto.getExpiration_year(),
-                requestDto.getNumber(),
-                requestDto.getCvv()
-        );
-        Payer payer = new Payer(requestDto.getHolder_name(), "", "");
-        paymentCardInfo = RequestPaymentCardInfo.build(
-                requestDto.getAmount(),
-                requestDto.getCurrency(),
-                requestDto.getCountry(),
-                requestDto.getOrder_id(),
-                requestDto.getMethod_id(),
-                card,
-                payer
-                );
-            var response = dlocal.createPaymentWithCardInfo(paymentCardInfo);
-            log.info(response.toString());
-            return response;
+            RequestCardInfo card = RequestCardInfo
+                .builder()
+                .holder_name(requestDto.getHolder_name())
+                .number(requestDto.getNumber())
+                .cvv(requestDto.getCvv())
+                .expiration_month(requestDto.getExpiration_month())
+                .expiration_year(requestDto.getExpiration_year())
+                .build();
+
+            Payer payer = Payer
+                .builder()
+                .name(requestDto.getHolder_name())
+                .email("")
+                .user_reference("")
+                .build();
+
+            RequestPaymentCardInfo paymentCardInfo = RequestPaymentCardInfo
+                .builder()
+                .amount(requestDto.getAmount())
+                .currency(requestDto.getCurrency())
+                .country(requestDto.getCountry())
+                .order_id(requestDto.getOrder_id())
+                .payment_method_id(requestDto.getMethod_id())
+                .payment_method_flow("DIRECT")
+                .notification_url("")
+                .callback_url("")
+                .payer(payer)
+                .card(card)
+                .build();
+
+            return dlocal.createPaymentWithCardInfo(paymentCardInfo);
         } catch (Exception e) {
             log.error("Error creando objetos" + e.getMessage());
             return null;

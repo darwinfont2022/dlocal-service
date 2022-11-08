@@ -15,5 +15,6 @@ public class RequestPaymentCardTokenDto {
     private String method_id;
     private String type;
 
+    private String holder_name;
     private String token;
 }
