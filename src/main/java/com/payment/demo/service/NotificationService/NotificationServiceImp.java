@@ -2,7 +2,7 @@ package com.payment.demo.service.NotificationService;
 
 import com.google.gson.Gson;
 import com.payment.demo.clients.config.SignatureCalculator;
-import com.payment.demo.dtos.NotificationDto;
+import com.payment.demo.controller.Notification.dto.NotificationDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

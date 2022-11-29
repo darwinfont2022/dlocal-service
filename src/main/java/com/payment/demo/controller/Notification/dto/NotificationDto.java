@@ -1,4 +1,4 @@
-package com.payment.demo.dtos;
+package com.payment.demo.controller.Notification.dto;
 
 import lombok.Data;
 import lombok.ToString;
@@ -19,9 +19,4 @@ public class NotificationDto {
     private String notification_url;
     private String created_date;
     private PayerDto payer;
-}
-class PayerDto{
-    public String name;
-    public String user_reference;
-    public String email;
 }
